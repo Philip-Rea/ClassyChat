@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Socket.IO chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font: 13px Helvetica, Arial;
+            height: 99%;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .main-div {
+            margin-left: 3%;
+            margin-right: 3%;
+            margin-top: 5px;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            grid-template-rows: 30px minmax(200px, 400px) auto;
+            grid-gap: 5px;
+            margin-left: auto;
+        }
+
+        .welcome {
+            grid-column: 1 / 2;
+            grid-row: 1 / 2;
+            padding: .5%;
+        }
+
+        .online-list {
+            grid-column: 2 / 3;
+            grid-row: 1 / 2;
+            padding: .5%;
+        }
+
+        .chat-box {
+            grid-column: 1 / 2;
+            grid-row: 2 / 3;
+            background: #B1CEF9;
+            width: 100%;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 3px solid black;
+            float: left;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .user-list {
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+            background: #B1CEF9;
+            width: 100%;
+            border: 3px solid black;
+            float: left;
+            overflow-y: auto;
+        }
+
+        #users {
+            list-style-type: none;
+            margin-left: 3px;
+        }
+
+        form {
+            grid-column: 1 / 3;
+            grid-row: 3 / 4;
+            width: 100%;
+            min-height: 40px;
+            border: 3px solid black;
+            margin: .1%;
+        }
+
+            form input {
+                width: 90%;
+                padding: 1%;
+                border: none;
+            }
+
+            form button {
+                width: 9.6%;
+                background: #97EDA4;
+                border: 2px solid black;
+                padding: 1%;
+                margin: .1%;
+            }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+            #messages li {
+                padding: 5px 10px;
+                overflow: auto;
+            }
+
+    </style>
+</head>
+<body>
+    <div class="main-div">
+        <h1>Classy Chat</h1>
+        <div class="grid-container">
+            <h2 class="welcome"; id="W1">Welcome User#</h2>
+            <h2 class="online-list">Online Users</h2>
+            <div class="chat-box">
+                <ul id="messages"></ul>
+            </div>
+            <div class="user-list"><ul id="users"></ul></div>
+            <form action="">
+                <input id="m" autocomplete="off" /><button>Send</button>
+            </form>
+        </div>
+    </div>
+    
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+         $(function () {
+             var socket = io();
+            $('form').submit(function(e){
+              e.preventDefault(); // prevents page reloading
+              socket.emit('chat message', $('#m').val());
+              $('#m').val('');
+              return false;
+            });
+             socket.on('chat message', function (time, client, msg) {
+                 var message = time + '<span style="color:' +client.colour + ';">' + client.nickname + '</span>: ' + msg;
+                 if (client.ID === socket.id) {
+                     $('#messages').append($('<li style="font-weight: bold;">').html(message));
+                 } else {
+                     $('#messages').append($('<li>').html(message));
+                 } 
+             });
+             socket.on('updateUsername', function (name, history) {
+                 $('#W1').text("Welcome " + name);
+                 for (var i = 0; i < history.length; i++) {
+                     var message = history[i].Time + '<span style="color:' + history[i].Client.colour + ';">' + history[i].Client.nickname + '</span>: ' + history[i].Message;
+                     $('#messages').append($('<li>').html(message));
+                 }
+             });
+             socket.on('nametaken', function (time, msg) {
+                     $('#messages').append($('<li style="font-weight: bold;">').text(time + "'" + msg + "' is not unique, try a different nickname"));
+             });
+             socket.on('newuser', function (clients) {
+                 $('#users').empty();
+                 for (var i = 0; i < clients.length; i++) {
+                      $('#users').append($('<li style="font-weight: bold;">').text(clients[i].nickname));
+                 }
+             });
+             socket.on('errorMessage', function (time, msg) {
+                 $('#messages').append($('<li style="font-weight: bold; color: Red;">').text(time + "Unknown Command: '" + msg + "'"));
+             });
+             socket.on('userDisconnect', function (clients) {
+                 $('#users').empty();
+                 console.log("user disconnected");
+                 for (var i = 0; i < clients.length; i++) {
+                      $('#users').append($('<li style="font-weight: bold;">').text(clients[i].nickname));
+                 }
+             });
+          });
+    </script>
+
+</body>
+</html>
