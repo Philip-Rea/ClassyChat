@@ -1,4 +1,4 @@
-// JavaScript source code
+// Philip Rea, 30002832, B02
 var app = require('express')();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
