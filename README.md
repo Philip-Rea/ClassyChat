@@ -1,5 +1,8 @@
-Philip Rea, 30002832, B02
-https://github.com/Philip-Rea/ClassyChat
-Chrome and Firefox tested.
-To run the application go to the directory containing the index.js file in cmd and run it using the "node indexjs"
+Created by Philip Rea
+
+A simple online chat application running on localhost, made with html5 and Javascript.
+
+To run the application copy this repository and go to the directory containing the index.js file in cmd then run it using the "node indexjs"
 To connect open Chrome or firefox and go to localhost:3000
+
+Multiple clients can connect and talk to eachother, each is given a unique username which can be changed, the colour of their name may also be changed.
